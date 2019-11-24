@@ -123,10 +123,7 @@ let fetchPatchUser = (bookObject) => {
       })
     })
     .then(resp => resp.json())
-    .then(json_resp => {
-        createUserList(json_resp)
-        
-    })
+    .then(createUserList)
     
     .catch((error) => {console.error(error);})
 }
