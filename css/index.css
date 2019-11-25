@@ -2,3 +2,9 @@ body {
 	display: grid;
 	grid-template-columns: 2fr 8fr
 }
+.book_user_ul {
+	font-weight: bold;
+}
+.book_user_li{
+	font-weight: lighter;
+}
