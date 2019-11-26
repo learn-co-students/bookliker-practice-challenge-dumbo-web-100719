@@ -1,69 +1,54 @@
-document.addEventListener("DOMContentLoaded", function() {
+//where to add book information
+let listArea = document.getElementById("list")
+let showArea = document.getElementById("show-panel")
+// --> show book's thumbnail, description, and list of users who have liked it
 
-let list = document.getElementById("list")
-let showBookInfo = document.getElementById("show-panel")
-
-function clearBox() {
-    showBookInfo.innerHTML = "";
-}
-
-
-
+//fetch the books 
 fetch("http://localhost:3000/books")
 .then(r => r.json())
 .then((books) => {
     books.forEach((book) => {
-        addBooktoList(book)
+       createBookListandShow(book)
     })
 })
 
+function getUserOne(){
+    // fetch("http://localhost:3000/users/1")
+    // .then(r => r.json())
+    // .then((userOne) => {
+    // })
+}
 
+function createBookListandShow(book){
+    let bookTitleLi = document.createElement("li")
+    bookTitleLi.innerText = book.title
+    listArea.append(bookTitleLi)
 
-
-function addBooktoList(book) {
-    
-    let bookH3 = document.createElement("h3")
-    let bookLi = document.createElement("li")
-    let bookButton = document.createElement("button")
-    bookButton.innerText = "More Info"
-    bookLi.innerText = book.title
-    bookLi.append(bookButton)
-    bookH3.append(bookLi)
-    list.append(bookH3)
-    
-    let userArray = book.users
-    console.log(userArray)
-    
-    
-    bookLi.addEventListener("click", (event) => {
-        clearBox()
-        
-        let bookInfoDiv = document.createElement("div")
-        bookInfoDiv.id = "clear-this-out"
+    bookTitleLi.addEventListener("click", (event) => {
+        showArea.innerHTML = ""
         let bookImage = document.createElement("img")
+        bookImage.src = book.img_url
         let bookDescription = document.createElement("p")
-        let bookUsers = document.createElement("ul")
-        let likeButton = document.createElement("button")
-        likeButton.innerText = "Like <3"
-            
+        bookDescription.innerText = book.description
 
-        userArray.forEach((user) => {
+        let bookUsersList = document.createElement("ul")
+        book.users.forEach((user) => {
             let userLi = document.createElement("li")
-            userLi.innerText = `${user.username}`
-            bookUsers.append(userLi)
-            bookInfoDiv.append(bookUsers)
+            userLi.id = `user-${user.id}`
+            userLi.innerText = user.username
+            bookUsersList.append(userLi)
         })
 
-        bookImage.src = book.img_url
-        bookDescription.innerText = book.description
-        
-        
-        bookInfoDiv.append(bookImage, bookDescription, bookUsers, likeButton)
-        showBookInfo.append(bookInfoDiv)
+        let likeButton = document.createElement("button")
+        likeButton.innerText = "Like <3"
 
-        // 
-        likeButton.addEventListener('click', (event) => {
-            fetch(`http://localhost:3000/users/1`)
+        let unlikeButton = document.createElement("button")
+        unlikeButton.innerText = "jk this sucked"
+
+        showArea.append(bookImage, bookDescription, bookUsersList, likeButton, unlikeButton)
+
+        likeButton.addEventListener("click", (event) => {
+            fetch("http://localhost:3000/users/1")
             .then(r => r.json())
             .then((userOne) => {
                 book.users.push(userOne)
@@ -71,38 +56,45 @@ function addBooktoList(book) {
                 fetch(`http://localhost:3000/books/${book.id}`, {
                     method: "PATCH",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'content-type': 'application/json',
+                        'accept': 'application/json'
                     },
                     body: JSON.stringify({
                         users: book.users
                     })
                 })
                 .then(r => r.json())
-                .then((response) => {
+                .then((book) => {
+                    let userOneLi = document.createElement("li")
+                    userOneLi.id = `user-${userOne.id}`
+                    userOneLi.innerText = userOne.username
+                    bookUsersList.append(userOneLi)
                 })
-                let newUserUl = document.createElement("ul")
-                let newUserLi = document.createElement("li")
-                newUserLi.innerText = `${userOne.username} has liked this book!`
-                newUserUl.append(newUserLi)
-                bookInfoDiv.append(newUserUl)
-            })       
+            })
         })
-        
-        
 
-
-        // function addUserToBook(user){
-        //     let userLi = document.createElement("li")
-        //     userLi.innerText = user.username
-        //     bookUsers.append(userLi)
-        // }
-        
-
-            
-        
-            
+        unlikeButton.addEventListener("click", (event) => {
+            fetch("http://localhost:3000/users/1")
+            .then((userOne) => {
+              book.users.pop(userOne)
+              console.log(book.users)
+              fetch(`http://localhost:3000/books/${book.id}`, {
+                  method: "PATCH",
+                  headers: {
+                      'content-type': 'application/json',
+                      'accept': 'application/json'
+                  },
+                  body: JSON.stringify({
+                      users: book.users
+                  })
+              })
+              .then(r => r.json())
+              .then((book) => {
+                  let userOneLi = document.getElementById("user-1")
+                  userOneLi.remove() 
+              })
+            })
         })
-    }
-})
-                 
+    })
+}
+                
